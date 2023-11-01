@@ -1,35 +1,47 @@
-document.addEventListener('DOMContentLoaded', function () {
-    const tweetForm = document.getElementById('tweetForm');
-    const tweetText = document.getElementById('tweetText');
-    const responseDiv = document.getElementById('response');
-    tweetForm.addEventListener('submit', function (event) {
-    event.preventDefault();
+document.addEventListener("DOMContentLoaded", function () {
+  const tweetForm = document.getElementById("tweetForm");
+  const tweetText = document.getElementById("tweetText");
+  const responseDiv = document.getElementById("response");
+
+  tweetForm.addEventListener("submit", function (event) {
+   
+    event.preventDefault(); 
+
     const tweet = tweetText.value;
-    // Make an HTTP POST request to the backend
-    fetch('https://one00x-data-analysis.onrender.com/posts', {
-    method: 'POST',
+    postTweet(tweet, responseDiv); 
+  });
+});
+
+function postTweet(tweetContent, responseDiv) {
+  // Make an HTTP POST request to the backend
+  fetch("https://one00x-data-analysis.onrender.com/posts", {
+    method: "POST",
     headers: {
-    'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify({ tweet }),
+    body: JSON.stringify({ post: { content: tweetContent } }),
+  })
+    .then((response) => {
+      if (response.ok) {
+        return response.json(); // Parse response as JSON
+      } else {
+        throw new Error("Tweet posting failed");// Handle failure
+      }
     })
-    .then(response => {
-    if (response.ok) {
-    return response.json(); // Parse response as JSON
-    } else {
-    throw new Error('Tweet posting failed'); // Handle failure
-    }
+    .then((data) => {
+      // Handle successful tweet post
+      handleSuccessfulPost(data, responseDiv); // Handle successful tweet post
     })
-    .then(data => {
-    // Handle successful tweet post
-    responseDiv.innerText = `Tweet posted successfully! Tweet ID: ${data.tweetId}
-    `;
-    })
-    .catch(error => {
-    // Handle error
-    responseDiv.innerText = `Error: ${error.message}`;
+    .catch((error) => {
+      // Handle error
+      handlePostError(error, responseDiv); // Handle error
     });
-    });
-    
-    });
-    
+}
+
+function handleSuccessfulPost(data, responseDiv) {
+  responseDiv.innerText = `Tweet posted successfully! Post ID: ${data.id}`;
+}
+
+function handlePostError(error, responseDiv) {
+  responseDiv.innerText = `Error: ${error.message}`;
+}
